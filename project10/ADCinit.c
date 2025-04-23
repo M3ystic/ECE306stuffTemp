@@ -22,7 +22,7 @@ void Init_port1ADC(void){
      P1SELC |= V_DETECT_L; // ADC input for V_DETECT_L
      P1SELC |= V_DETECT_R; // ADC input for V_DETECT_R
      P1SELC |= V_A4_SEEED; // ADC input for V_A4_SEEED
-     P1SELC |= V_THUMB; // ADC input for V_THUMB
+    // P1SELC |= V_THUMB; // ADC input for V_THUMB
      P1SEL0 |= UCA0TXD; // UCA0TXD pin
      P1SEL1 &= ~UCA0TXD; // UCA0TXD pin
      P1SEL0 |= UCA0RXD; // UCA0RXD pin

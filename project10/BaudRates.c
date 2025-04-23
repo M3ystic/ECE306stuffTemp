@@ -91,7 +91,7 @@ void Init_IOT(void) {
 
     //dont cares
     P3OUT |= IOT_LINK_CPU; // Initial Value = Low / Off
-    P2OUT &= ~IOT_RUN_RED; // Initial Value = Low / Off
+    P2OUT |= IOT_RUN_RED; // Initial Value = Low / Off
 }
 
 #pragma vector=EUSCI_A0_VECTOR
@@ -105,7 +105,7 @@ __interrupt void eUSCI_A0_ISR(void) {
             // In A0 RX
             iot_receive = UCA0RXBUF;
             iot_rx_buf[iot_rx++] = iot_receive;
-
+            P2OUT ^= IOT_RUN_RED; // Initial Value = Low / Off
             if (prev_char == 0x0D || iot_receive == 0x0A) {  // received "\r\n"
             //  iot_rx_buf[usb_rx] = '\0'; // Null-terminate
                 IOT_RECIEVEDFLAG = ENABLED;
@@ -146,14 +146,12 @@ __interrupt void eUSCI_A1_ISR(void) {
 
             // Store character
             usb_rx_buf[usb_rx++] = usb_receive;
-
+            P2OUT ^= IOT_RUN_RED; // Initial Value = Low / Off
             // If carriage return, handle end-of-message logic
             if (prev_char == 0x0D || usb_receive == 0x0A) {
             //  usb_rx_buf[usb_rx] = '\0'; // Null-terminate
                 USB_RECIEVEDFLAG = ENABLED;
                 command_detected = FALSE;
-
-                // Check for commands
                 if (strstr(usb_rx_buf, "^F") != NULL) {
                     BAUDRATE115200 = TRUE;
                     command_detected = TRUE;

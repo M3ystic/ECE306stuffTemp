@@ -51,10 +51,6 @@ __interrupt void switch_interrupt(void)
         TB1CCTL1 &= ~CCIFG;         // Clear interrupt flag for CCR1
         TB1CCTL2 &= ~CCIFG;         // Clear interrupt flag for CCR2
 
-        task = 0;
-        counter = 0;
-//
-//        UCA1IE |= UCTXCPTIE;
         UCA1IFG &= ~UCTXIFG; // Clear TX flag
 
     }
@@ -76,16 +72,14 @@ __interrupt void switch_interrupt2(void)
         P2IE &= ~SW2;               // Disable Switch 2 interrupts during debounce
 
         // Clear Timer B0 interrupt flags
-        TB1CCTL1 |= CCIE;           // Enable interrupt for CCR1 of Timer B1
+       // TB1CCTL1 |= CCIE;           // Enable interrupt for CCR1 of Timer B1
 
         TB0CCTL0 &= ~CCIFG;         // Clear interrupt flag for CCR0
         TB0CCTL1 &= ~CCIFG;         // Clear interrupt flag for CCR1
         TB0CCTL2 &= ~CCIFG;         // Clear interrupt flag for CCR2
 
-     //  UCA1IFG &= ~UCTXIFG; // Clear TX flag
 
         task = -1;
-        counter = 0;
 
     }
 }

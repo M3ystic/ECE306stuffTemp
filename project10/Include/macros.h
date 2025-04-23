@@ -63,7 +63,7 @@
 
 #define TB1CCR0_200MS   (25000)  /* 8 000 000 / 8 / 8 / 5     (1/200ms) --> (1/.2) = 5  */
 #define TB1CCR1_200MS   (25000)  /* 8 000 000 / 8 / 8 / 5     (1/200ms) --> (1/.2) = 5  */
-
+#define TB1CCR2_200MS   (25000)  /* 8 000 000 / 8 / 8 / 5     (1/200ms) --> (1/.2) = 5  */
 
 #define PWM_PERIOD (TB3CCR0)
 #define LCD_BACKLITE_DIMING (TB3CCR1)
@@ -75,9 +75,9 @@
 #define WHEEL_OFF (0)
 
 #define LEFTSLOW  (40000)
-#define RIGHTSLOW (LEFTSLOW - 15200)
+#define RIGHTSLOW (LEFTSLOW - 13000)
 #define LEFTFAST  (50000)
-#define RIGHTFAST (LEFTFAST - 15200)
+#define RIGHTFAST (LEFTFAST - 13000)
 
 
 
@@ -102,13 +102,14 @@
 
 
 #define LIMIT (1000)
-#define MIDDLELINE (600)//600
+int MIDDLELINE;
+#define HYSTERESIS 35  // Buffer zone to prevent sudden switching
 
 
 #define DISPLAY_LINE_LENGTH (9)
 
 #define DAC_BEGIN (4000) // 2v
-#define DAC_LIMIT (2000) // 6.08v
+#define DAC_LIMIT (1650) // 6.08v
 #define DAC_Adjust (875) // 6.00v
 ///5.174v is 1200
 //2100 to start moving
@@ -120,6 +121,12 @@
 #define USB_RX_BUF_SIZE 25  // Define buffer size (adjust as needed)
 
 
+
+#define MAX_LEN             16
+#define MAX_BUFFER_SIZE     32
+#define BEGINNING           0
+
+#define SMALL_RING_SIZE (16)
 
 #define BAUD_115200 4
 #define MCTL_115200 0x5551

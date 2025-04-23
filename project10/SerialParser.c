@@ -12,6 +12,8 @@
 #include "include/ports.h"
 #include "include/macros.h"
 #include <stdlib.h>  // Required for atoi
+#include <stdio.h>
+
 
 extern char display_line[4][11];
 extern char *display[4];
@@ -27,11 +29,20 @@ extern char iot_rx_buf[128];
 unsigned int iot_tx;
 
 extern int task;
+extern int task2;
+extern int task3;
 unsigned int task_duration;
+extern volatile unsigned int updatetimerflag; // Flag for timer update
 
 extern int counter;
+unsigned int blacklinefollowing = FALSE;
+unsigned int leavingCircle = FALSE;
+unsigned int turnFlag = 0;
 
 void parse_and_execute_commands(char* buffer) {
+    if (strstr(buffer, "IP,")) {
+                   parse_ip_address(buffer);  // Parse and display IP
+               }
     char* command_start = strchr(buffer, '^');
 
     if (command_start != NULL) {
@@ -50,7 +61,6 @@ void parse_and_execute_commands(char* buffer) {
             }
 
             char direction = command_start[4];
-            char arrival = command_start[5];
             int duration = atoi(&command_start[5]);
 
 
@@ -59,68 +69,128 @@ void parse_and_execute_commands(char* buffer) {
 
 
             counter = 0;
-
+            P2OUT ^= IOT_RUN_RED; // Initial Value = Low / Off
             // Define scaling factors for each task
-            unsigned int forward_multiplier = 5;
-            unsigned int backward_multiplier = 5;
+            unsigned int forward_multiplier = 3;
+            unsigned int backward_multiplier = 3;
             unsigned int right_multiplier = 1;
             unsigned int left_multiplier = 1;
+            // First switch for direction
+            switch (direction) {
+                case 'F': // Forward
+                    task = 0;
+                    task_duration = duration * forward_multiplier;
+                    TB1CCTL1 |= CCIE; // Enable the timer interrupt for the task
+                    break;
+                case 'B': // Backward
+                    task = 1;
+                    task_duration = duration * backward_multiplier;
+                    TB1CCTL1 |= CCIE; // Enable the timer interrupt for the task
+                    break;
+                case 'R': // Right
+                    task = 2;
+                    task_duration = duration * right_multiplier;
+                    TB1CCTL1 |= CCIE; // Enable the timer interrupt for the task
+                    break;
+                case 'L': // Left
+                    task = 3;
+                    task_duration = duration * left_multiplier;
+                    TB1CCTL1 |= CCIE; // Enable the timer interrupt for the task
+                    break;
+                case 'S': //start black line following
+                    task2 = 0;
+                    TB1CCTL2 |= CCIE; // Enable the timer interrupt for the task
+                    blacklinefollowing = TRUE;
+                    turnFlag = 1;
+                    break;
+                case 'Y': //start black line following
+                    task2 = 0;
+                    TB1CCTL2 |= CCIE; // Enable the timer interrupt for the task
+                    blacklinefollowing = TRUE;
+                    turnFlag = 2;
+                    break;
+                case 'T':
+                     stop();
+                     break;
+                case 'E': //start black line following
+                    P1OUT ^= RED_LED; // Initial Value = Low / Off
+                    updatetimerflag= 0;
+                    leavingCircle = TRUE;
+                    TB1CCTL2 |= CCIE; // Enable the timer interrupt for the task
+                    break;
+                default:
+                    // Handle invalid direction if necessary
+                    // Do not enable the timer if the direction is invalid
+                    break;
+            }
 
-            //First switch for direction
-           switch (direction) {
-               case 'F': // Forward
-                   task = 0;
-                   task_duration = duration * forward_multiplier;
-                   break;
-               case 'B': // Backward
-                   task = 1;
-                   task_duration = duration * backward_multiplier;
-                   break;
-               case 'R': // Right
-                   task = 2;
-                   task_duration = duration * right_multiplier;
-                   break;
-               case 'L': // Left
-                   task = 3;
-                   task_duration = duration * left_multiplier;
-                   break;
-               default:
-                   // Handle invalid direction if necessary
-                   break;
-           }
+            // Second switch for arrival
+            switch (stored_command[0]) {
+            case '0':
+                P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                strcpy(display_line[0], "Arrived 00");
+                strncpy(display_line[3], stored_command,5);
+                stop();
+                task = 5;
+                break;
+                case '1':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 01");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    break;
+                case '2':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 02");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    stop();
+                    break;
+                case '3':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 03");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    stop();
+                    break;
+                case '4':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 04");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    stop();
+                    break;
+                case '5':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 05");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    stop();
+                    break;
+                case '6':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 06");
+                    strncpy(display_line[3], stored_command,5);
+                    task = 5;
+                    stop();
+                    break;
+                case '7':
+                    P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                    strcpy(display_line[0], "Arrived 07");
+                    strncpy(display_line[3], stored_command,5);
+                    updatetimerflag= 0;
+                    task = 5;
+                    stop();
+                    break;
+                default:
+                    // Handle invalid arrival if necessary
+                    break;
+            }
 
-           // Second switch for arrival
-           switch (arrival) {
-               case '1':
-                   strcpy(display_line[0], "Arrived 01");
-                   break;
-               case '2':
-                   strcpy(display_line[0], "Arrived 02");
-                   break;
-               case '3':
-                   strcpy(display_line[0], "Arrived 03");
-                   break;
-               case '4':
-                   strcpy(display_line[0], "Arrived 04");
-                   break;
-               case '5':
-                   strcpy(display_line[0], "Arrived 05");
-                   break;
-               case '6':
-                   strcpy(display_line[0], "Arrived 06");
-                   break;
-               case '7':
-                   strcpy(display_line[0], "Arrived 07");
-                   break;
-               default:
-                   // Handle invalid arrival if necessary
-                   break;
-           }
-
-            TB1CCTL1 |= CCIE; // Enable the timer interrupt for the task
         }
     }
 }
+
 
 void send_at_command(const char* command) {
     strcpy(iot_tx_buf, command);  // Copy the command to the IOT TX buffer
@@ -166,9 +236,9 @@ void center_text(char* dest, const char *src, int width) {
 //    display_line[1] --> centered second part ("p3.p4")
 // If parsing fails, then it shows the default messages centered.
 void parse_ip_address(char* input) {
-    char *start = strstr(input, "+CIFSR:STAIP,");
+    char *start = strstr(input, "IP,");
     if (start != NULL) {
-        start += strlen("+CIFSR:STAIP,");  // Move past the prefix
+        start += strlen("IP,");  // Move past the prefix
 
         // Skip the opening quote, if present.
         if (*start == '"') {
@@ -279,6 +349,62 @@ void parse_ip_address(char* input) {
     update_display = 1;
     display_changed = 1;
 }
+
+
+void changedIPlines(const char* ip) {
+    if (ip == NULL || strlen(ip) == 0) {
+        // If no IP, show default message.
+        char line1[LINE_LEN] = {0};
+        char line2[LINE_LEN] = {0};
+        center_text(line1, "No IP", LINE_LEN);
+        center_text(line2, "Received", LINE_LEN);
+        strcpy(display_line[0], line1);
+        strcpy(display_line[1], line2);
+    } else {
+        // Parse the IP and divide it into two lines.
+        char token1[6] = {0}, token2[6] = {0}, token3[6] = {0}, token4[6] = {0};
+        const char* p = ip;
+
+        // Split the IP into tokens.
+        char* dot = strchr(p, '.');
+        if (dot) {
+            strncpy(token1, p, dot - p);
+            token1[dot - p] = '\0';
+            p = dot + 1;
+            dot = strchr(p, '.');
+        }
+        if (dot) {
+            strncpy(token2, p, dot - p);
+            token2[dot - p] = '\0';
+            p = dot + 1;
+            dot = strchr(p, '.');
+        }
+        if (dot) {
+            strncpy(token3, p, dot - p);
+            token3[dot - p] = '\0';
+            p = dot + 1;
+            strncpy(token4, p, 5);
+        }
+
+        // Combine token1 and token2 into line1, and token3 and token4 into line2.
+        char tmp[LINE_LEN] = {0};
+        snprintf(tmp, sizeof(tmp), "%s.%s", token1, token2);
+        char line1[LINE_LEN] = {0};
+        center_text(line1, tmp, LINE_LEN);
+
+        snprintf(tmp, sizeof(tmp), "%s.%s", token3, token4);
+        char line2[LINE_LEN] = {0};
+        center_text(line2, tmp, LINE_LEN);
+
+        // Update display lines.
+        strcpy(display_line[1], line1);
+        strcpy(display_line[2], line2);
+    }
+
+    update_display = 1;
+    display_changed = 1;
+}
+
 
 void parse_ssid_address(char* input) {
     // Clear display_line[2].

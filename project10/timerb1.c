@@ -24,6 +24,7 @@
 extern unsigned int debounce_count1;  // Counter for debounce logic
 extern unsigned int debounce1_in_progress;     // Flag indicating if debounce is active
 extern int counter;                            // General-purpose counter
+extern int counter2;
 extern int task;
 
 // Function to initialize Timer B1
@@ -41,7 +42,7 @@ void Init_timer_B1(void)
     TB1CTL &= ~TBIFG;              // Clear the timer overflow interrupt flag
 
     TB1CCR1 = TB1CCR1_200MS;       // Set CCR1 for another 200ms interval
- // TB1CCR2 = T1CCR2_250MS;        // Uncomment if CCR2 is needed
+    TB1CCR2 = TB1CCR2_200MS;        // Uncomment if CCR2 is needed
 }
 
 // ISR for Timer B1 CCR0
@@ -59,28 +60,13 @@ __interrupt void Timer1_B0_ISR(void)
     }
 }
 
-// ISR for Timer B1 CCRx (CCR1, CCR2, Overflow)
 #pragma vector = TIMER1_B1_VECTOR
-__interrupt void TIMER1_B1_ISR(void)
-{
-    switch (__even_in_range(TB1IV, 14))
-    { // Handle the Timer B1 interrupt vector
-        case 0:
-            break;                 // No interrupt
-        case 2:                   // CCR1 interrupt
-
-            counter++;             // Increment the general-purpose counter (used to specifiy time in seconds)
-
-
-//            if (counter == 9){
-//                       P1OUT |= RED_LED;
-//                   }
-            break;                 // counter == 5, with a 200ms timer is 1 second
-        case 4:
-            break;                // CCR2 interrupt (currently unused)
-        case 14:
-            break;                 // Timer overflow interrupt
-        default:
-            break;                 // Fallback case
+__interrupt void TIMER1_B1_ISR(void) {
+    switch (__even_in_range(TB1IV, 14)) {
+        case 0: break; // No interrupt
+        case 2: counter++; break; // CCR1 interrupt
+        case 4: counter2++; break; // CCR2 interrupt
+        case 14: break; // Timer overflow
+        default: break;
     }
 }

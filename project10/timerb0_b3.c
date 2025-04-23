@@ -24,7 +24,7 @@ extern volatile unsigned int debounce_count2; // Counter for debounce logic
 extern unsigned int debounce2_in_progress;    // Debounce in progress flag
 
 // Timer variables
-volatile unsigned int timechanged = 0;        // Time tracking variable
+ unsigned int timechanged = 0;        // Time tracking variable
 extern volatile unsigned int updatetimerflag; // Flag for timer update
 extern unsigned int DAC_data;                 // DAC data value
 int counterIOT;
@@ -36,6 +36,14 @@ volatile unsigned int send_cipserver_command_flag = FALSE;   // Set flag for sen
 unsigned int timer = 0;        // Timer to handle the delay between commands
 unsigned int command_sent = 0;  // Static flag to track sent command state
 unsigned int timerflag;
+
+int calibratingTime;
+
+extern int maxBlackValue; // Track highest black detection for right sensor
+extern int minWhiteValue; // Track highest black detection for right sensor
+extern int calibrating;
+extern unsigned int calibratingFlag;
+
 
 // Function to initialize Timer_B0
 void Init_timer_B0(void)
@@ -70,6 +78,18 @@ __interrupt void Timer0_B0_ISR(void)
 
     update_display = TRUE;   // Set flag to update display
     display_changed = TRUE; // Notify display has changed
+
+    if (calibratingFlag == TRUE){
+        calibratingTime++;
+    if (calibratingTime == 25) {
+      MIDDLELINE = (int)(maxBlackValue * 0.5 + minWhiteValue * 0.5);
+        P1OUT ^= RED_LED;
+        calibratingFlag = FALSE;
+    }
+    }
+
+    TB0CCR0 += TB0CCR0_200MS;
+
 }
 
 // Timer_B0 CCR1-CCR2 and overflow ISR
@@ -94,7 +114,6 @@ __interrupt void TIMER0_B1_ISR(void)
                 if (counterIOT == 20) {
                     P3OUT |= IOT_EN_CPU;  // Enable IOT
                     send_commands_flag = TRUE;  // Set the flag to trigger command sending
-                    TB0CCTL1 &= ~CCIE; // CCR1 enable interrupt
 
                 }
 
@@ -111,10 +130,10 @@ __interrupt void TIMER0_B1_ISR(void)
             {
                 debounce2_in_progress = DISABLED; // Disable debounce in progress
                 TB0CCTL2 &= ~CCIE; // CCR1 enable interrupt
-                //P6OUT |= GRN_LED; // Toggle LED for debugging
                 P2IE |= SW2; // Enable the Switch Interrupt.
 
             }
+            TB0CCR2 += TB0CCR2_250MS;
             break;
         case 14: break; // Overflow interrupt (not used)
         default: break;

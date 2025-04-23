@@ -105,28 +105,22 @@ void motors_reverse(void);
 void motors_off(void);
 void right_forward(void);
 void left_forward(void);
-void moveCircle(void);
-void moveTriangle(void);
-void moveFigure8(void);
-void Run_Straight(void);
-void wait_case(void);
-void start_case(void);
-void trianglerun_case(void);
-void circlerun_case(void);
-void f8run_case(void);
-void end_case(void);
-void Run_Straight();
-void Run_Circle();
-void Run_Triangle();
-void Run_Figure_Eight();
-void pj5forward(void);
-void pj5reverse(void);
 void clockwise(void);
 void counterclockwise(void);
 void pj6pause(void);
 void straight(void);
 void turn(void);
-void stop_motors(void);
+void stop(void);
+void turn_right(void);
+void turn_left(void);
+void backwards(void);
+void forwards(void);
+void ControlForward(void);
+void Cturn_right(void);
+void Cturn_left(void);
+void rightboard_turn(void);
+void rightboard_turn2(void);
+void leftboard_turn(void);
 
 //timers
 void enableDisplay(void);
@@ -191,6 +185,7 @@ void Init_UART_A1(void);
 void Init_IOT(void);
 void parse_and_execute_commands(char* input);
 void parse_ip_address(char* input);
+void changedIPlines(const char* ip);
 void parse_ssid_address(char* input);
 void center_text(char* dest, const char *src, int width);
 
@@ -205,6 +200,10 @@ void five_msec_sleep(unsigned int msec);
 void measure_delay(void);
 void out_control_words(void);
 
+
+void followblackline(void);
+void go_autonomous(void);
+void end_autonomous(void);
 
 #endif //functions_h
 

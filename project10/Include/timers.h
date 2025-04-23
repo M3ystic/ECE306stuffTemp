@@ -20,7 +20,10 @@
     unsigned int updateDisplayFlag;
 
      int task =-1;
+     int task2 =-1;
+     int task3 =-1;
      int counter = -1;
+     int counter2 = -1;
 
 
 

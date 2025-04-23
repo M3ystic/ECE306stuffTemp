@@ -63,26 +63,26 @@ inline void motors_off(void)
 }
 
 
-void right_forward(void)
-{
-    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
-    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
-
-    P6OUT &= ~L_FORWARD; // Set Port pin low [Wheel Off]
-    P6OUT |= R_FORWARD; // Set Port pin High [Wheel On]
-
-
-}
-
-void left_forward(void)
-{
-    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
-    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
-
-    P6OUT &= ~R_FORWARD; // Set Port pin low [Wheel Off]
-    P6OUT |= L_FORWARD; // Set Port pin High [Wheel On]
-
-
-}
-
+//void right_forward(void)
+//{
+//    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
+//    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
+//
+//    P6OUT &= ~L_FORWARD; // Set Port pin low [Wheel Off]
+//    P6OUT |= R_FORWARD; // Set Port pin High [Wheel On]
+//
+//
+//}
+//
+//void left_forward(void)
+//{
+//    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
+//    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
+//
+//    P6OUT &= ~R_FORWARD; // Set Port pin low [Wheel Off]
+//    P6OUT |= L_FORWARD; // Set Port pin High [Wheel On]
+//
+//
+//}
+//
 

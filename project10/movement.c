@@ -50,268 +50,163 @@ int left_motor_count = 0;
 int segment_count = 0;
 
 // FSM dispatcher
-
-
-
 void straight(void){
 
     RIGHT_REVERSE_SPEED = WHEEL_OFF; // P6.3 Right Reverse PWM duty cycle
     LEFT_REVERSE_SPEED = WHEEL_OFF; // P6.4 Left Reverse PWM duty cycle
-
-
-    RIGHT_FORWARD_SPEED = RIGHTFAST; // P6.1 Right Forward PWM duty cycle  //130000
+    RIGHT_FORWARD_SPEED = RIGHTFAST - 3000 ; // P6.1 Right Forward PWM duty cycle  //130000
     LEFT_FORWARD_SPEED = LEFTFAST; // P6.2 Left Forward PWM duty cycle
 
 
 }
 
-void turn(void){
+void ControlForward(void)
+{
+
     RIGHT_REVERSE_SPEED = WHEEL_OFF; // P6.3 Right Reverse PWM duty cycle
-    LEFT_FORWARD_SPEED = WHEEL_OFF; // P6.2 Left Forward PWM duty cycle
+    LEFT_REVERSE_SPEED = WHEEL_OFF; // P6.4 Left Reverse PWM duty cycle
+    RIGHT_FORWARD_SPEED = RIGHTFAST - 1000 ; // P6.1 Right Forward PWM duty cycle  //130000
+    LEFT_FORWARD_SPEED = LEFTFAST; // P6.2 Left Forward PWM duty cycle
+}
 
+void forwards(void){
 
-        LEFT_FORWARD_SPEED = MAX_SPEED; // P6.1 Right Forward PWM duty cycle
-        RIGHT_REVERSE_SPEED = MAX_SPEED; // P6.4 Left Reverse PWM duty cycle //4500
-
-
+    RIGHT_REVERSE_SPEED = WHEEL_OFF; // P6.3 Right Reverse PWM duty cycle
+    LEFT_REVERSE_SPEED = WHEEL_OFF; // P6.4 Left Reverse PWM duty cycle
+    RIGHT_FORWARD_SPEED = RIGHTFAST; // P6.1 Right Forward PWM duty cycle  //130000
+    LEFT_FORWARD_SPEED = LEFTFAST; // P6.2 Left Forward PWM duty cycle
 
 }
 
+void backwards(void){
+     LEFT_FORWARD_SPEED = WHEEL_OFF;
+     RIGHT_FORWARD_SPEED = WHEEL_OFF;
+     RIGHT_REVERSE_SPEED = RIGHTFAST - 4500;
+     LEFT_REVERSE_SPEED = LEFTFAST;
+}
+
+void stop() {
+    RIGHT_FORWARD_SPEED = WHEEL_OFF;
+    LEFT_FORWARD_SPEED = WHEEL_OFF;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+}
+
+void turn_right() {
+    LEFT_FORWARD_SPEED = 32000;
+    RIGHT_REVERSE_SPEED = 20000;
+    RIGHT_FORWARD_SPEED = WHEEL_OFF;
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+}
+
+void turn_left() {
+    LEFT_REVERSE_SPEED = 32000;
+    RIGHT_FORWARD_SPEED = 20000;
+    LEFT_FORWARD_SPEED = WHEEL_OFF;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
+
+}
+
+void Cturn_right() {
+    LEFT_FORWARD_SPEED = LEFTSLOW;
+    RIGHT_REVERSE_SPEED = RIGHTSLOW;
+    RIGHT_FORWARD_SPEED = WHEEL_OFF;
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+}
+
+void Cturn_left() {
+    LEFT_REVERSE_SPEED = LEFTSLOW;
+    RIGHT_FORWARD_SPEED = RIGHTSLOW;
+    LEFT_FORWARD_SPEED = WHEEL_OFF;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
+
+}
+void left_forward() {
+    LEFT_FORWARD_SPEED = LEFTFAST;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
+    RIGHT_FORWARD_SPEED = WHEEL_OFF;
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+
+}
+void right_forward() {
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+    RIGHT_FORWARD_SPEED = RIGHTFAST;
+    LEFT_FORWARD_SPEED = WHEEL_OFF;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
+}
+
+void clockwise() {
+    LEFT_FORWARD_SPEED = WHEEL_OFF;
+    RIGHT_FORWARD_SPEED = RIGHTFAST;
+    LEFT_REVERSE_SPEED = LEFTFAST;    // Reverse left to spin clockwise
+    RIGHT_REVERSE_SPEED = WHEEL_OFF; // No reverse on the right
+}
+
+void counterclockwise() {
+    LEFT_FORWARD_SPEED = LEFTFAST;
+    RIGHT_FORWARD_SPEED = WHEEL_OFF;
+    LEFT_REVERSE_SPEED = WHEEL_OFF;  // No reverse on the left
+    RIGHT_REVERSE_SPEED = RIGHTFAST; // Reverse right to spin counterclockwise
+}
 
 
+void leftboard_turn(){
+    LEFT_REVERSE_SPEED = WHEEL_OFF;
+    RIGHT_FORWARD_SPEED = RIGHTFAST;
+    LEFT_FORWARD_SPEED = 20000;
+    RIGHT_REVERSE_SPEED = WHEEL_OFF;
 
+}
+void rightboard_turn(void) {
+    static int pulse_counter = 0;  // Tracks the current pulse state
+    int on_time_ticks = 9;         // On for 1 second (5 × 200ms)
+    int off_time_ticks = 10;        // Off for 1 second (5 × 200ms)
+    int total_pulse_ticks = on_time_ticks + off_time_ticks;
 
+    if (pulse_counter < on_time_ticks) {
+        // Wheels active during the on-time
+        LEFT_REVERSE_SPEED = WHEEL_OFF;
+        RIGHT_FORWARD_SPEED = 35000;  // Minimum allowed speed
+        LEFT_FORWARD_SPEED = LEFTFAST;
+        RIGHT_REVERSE_SPEED = WHEEL_OFF;
+    } else {
+        // Wheels inactive during the off-time
+        LEFT_REVERSE_SPEED = WHEEL_OFF;
+        RIGHT_FORWARD_SPEED = WHEEL_OFF;  // Disable the right wheel
+        LEFT_FORWARD_SPEED = LEFTFAST;   // Keep the left wheel turning
+        RIGHT_REVERSE_SPEED = WHEEL_OFF;
+    }
 
-
-
-
-
-
-
-
-
-
-void moveCircle(void) {
-    switch (state) {
-        case WAIT: // Begin
-            wait_case();
-            break;
-        case START: // Begin
-            start_case();
-            break;
-        case RUN: // Run
-            circlerun_case();
-            break;
-        case END: // End
-            end_case();
-            break;
-        default:
-            break;
+    // Increment and reset the pulse counter as needed
+    pulse_counter++;
+    if (pulse_counter >= total_pulse_ticks) {
+        pulse_counter = 0;  // Reset pulse counter after a full cycle
     }
 }
+void rightboard_turn2(void) {
+    static int pulse_counter = 0;  // Tracks the current pulse state
+    int on_time_ticks = 6;         // On for 1 second (5 × 200ms)
+    int off_time_ticks = 12;        // Off for 1 second (5 × 200ms)
+    int total_pulse_ticks = on_time_ticks + off_time_ticks;
 
-void moveTriangle(void) {
-    switch (state) {
-        case WAIT: // Begin
-            wait_case();
-            break;
-        case START: // Begin
-            start_case();
-            break;
-        case RUN: // Run
-            trianglerun_case();
-            break;
-        case END: // End
-            end_case();
-            break;
-        default:
-            break;
-    }
-}
-
-void moveFigure8(void) {
-    switch (state) {
-        case WAIT: // Begin
-            wait_case();
-            break;
-        case START: // Begin
-            start_case();
-            break;
-        case RUN: // Run
-            f8run_case();
-            break;
-        case END: // End
-            end_case();
-            break;
-        default:
-            break;
-    }
-}
-
-// Case functions
-void wait_case(void) {
-    if (time_change) {
-        time_change = 0;
-        if (delay_start++ >= WAITING2START) {
-            delay_start = 0;
-            state = START;
-        }
+    if (pulse_counter < on_time_ticks) {
+        // Wheels active during the on-time
+        LEFT_REVERSE_SPEED = WHEEL_OFF;
+        RIGHT_FORWARD_SPEED = 30000;  // Minimum allowed speed
+        LEFT_FORWARD_SPEED = LEFTFAST;
+        RIGHT_REVERSE_SPEED = WHEEL_OFF;
+    } else {
+        // Wheels inactive during the off-time
+        LEFT_REVERSE_SPEED = WHEEL_OFF;
+        RIGHT_FORWARD_SPEED = WHEEL_OFF;  // Disable the right wheel
+        LEFT_FORWARD_SPEED = LEFTFAST;   // Keep the left wheel turning
+        RIGHT_REVERSE_SPEED = WHEEL_OFF;
     }
 
-
-
+    // Increment and reset the pulse counter as needed
+    pulse_counter++;
+    if (pulse_counter >= total_pulse_ticks) {
+        pulse_counter = 0;  // Reset pulse counter after a full cycle
+    }
 }
-
-void start_case(void) {
-    cycle_time = 0;
-    right_motor_count = 0;
-    left_motor_count = 0;
-    motors_forward();
-    segment_count = 0;
-    state = RUN;
-}
-
-
-void end_case(void) {
-    motors_off();
-    state = WAIT;
-    event = NONE;
-}
-
-void circlerun_case(void) {
-//    if (time_change) {
-//        time_change = 0;
-//        if (segment_count <= circleTRAVEL_DISTANCE) {
-//            if (right_motor_count++ >= circleRIGHT_COUNT_TIME) {
-//                P6OUT &= ~R_FORWARD;
-//            }
-//            if (left_motor_count++ >= circleLEFT_COUNT_TIME) {
-//                P6OUT &= ~L_FORWARD;
-//            }
-//            if (cycle_time >= circleWHEEL_COUNT_TIME) {
-//                cycle_time = 0;
-//                right_motor_count = 0;
-//                left_motor_count = 0;
-//                segment_count++;
-//                motors_forward();
-//            }
-//        } else {
-//            state = END;
-//        }
-//    }
-}
-
-      inline void pj5forward(void){
-
-
-
-
-            strcpy(display_line[0], "           ");
-            strcpy(display_line[1], "           ");
-            strcpy(display_line[2], "  Forward  ");
-            strcpy(display_line[3], "           ");
-
-
-
-        }
-      inline void pj5reverse(void){
-
-
-            motors_reverse();
-
-            strcpy(display_line[0], "           ");
-            strcpy(display_line[1], "  Reverse  ");
-            strcpy(display_line[2], "           ");
-            strcpy(display_line[3], "           ");
-
-
-        }
-      inline void pj6pause(void){
-
-
-            motors_off();
-
-            strcpy(display_line[0], "           ");
-            strcpy(display_line[1], "           ");
-            strcpy(display_line[2], "   Pause   ");
-            strcpy(display_line[3], "           ");
-
-
-        }
-       inline void clockwise(void)
-        {
-
-
-               P1OUT &= ~RED_LED; // Set Red LED off
-               P6OUT |= GRN_LED; // set green led on
-
-               P6OUT |= L_FORWARD; // Set Port pin High [Wheel On]
-               P6OUT |= R_REVERSE; // Set Port pin High [Wheel On]
-
-               strcpy(display_line[0], "           ");
-               strcpy(display_line[1], " Clockwise ");
-               strcpy(display_line[2], "           ");
-               strcpy(display_line[3], "           ");
-
-        }
-       inline void counterclockwise(void)
-        {
-
-
-
-            P6DIR &= ~GRN_LED; // Set Green LED off
-            P1OUT |= RED_LED; // Set Red LED On
-
-            P6OUT |= R_FORWARD; // Set Port pin High [Wheel On]
-            P6OUT |= L_REVERSE; // Set Port pin High [Wheel On]
-
-            strcpy(display_line[0], "           ");
-            strcpy(display_line[1], "           ");
-            strcpy(display_line[2], " CClockwise");
-            strcpy(display_line[3], "           ");
-
-
-        }
-
-       void stop_motors(void){
-           LEFT_FORWARD_SPEED = WHEEL_OFF;
-           RIGHT_FORWARD_SPEED = WHEEL_OFF;
-           RIGHT_REVERSE_SPEED = WHEEL_OFF;
-           LEFT_REVERSE_SPEED = WHEEL_OFF;
-
-
-
-       }
-
-
-
-
-void trianglerun_case(void) {
-    if(time_change){
-           motors_forward();
-
-           } else {
-               state = END;
-           }
-
-}
-void f8run_case(void) {
-    if (time_change) {
-
-        motors_forward();
-
-        } else {
-            state = END;
-        }
-
-}
-
-
-
-
-
-
-
-
-
 

@@ -15,7 +15,6 @@
 #include  "include\ports.h"
 #include  "include\macros.h"
 
-
 volatile char slow_input_down;
 extern char display_line[4][11];
 extern char *display[4];
@@ -55,6 +54,7 @@ extern unsigned int debounce2_in_progress;
 extern int task;
 extern unsigned int task_duration;
 extern int counter;
+extern int counter2;
 extern int updateDisplayFlag;
 
 //
@@ -73,12 +73,12 @@ extern int error;
 unsigned int ircheck;
 //char adc_char[4];
 //char adc_char2[4];
-//char adc_char3[4];
+extern char adc_char3[4];
 //
 //int location = 1;
-int side;
 
-extern volatile unsigned int timechanged;
+
+extern unsigned int timechanged;
 unsigned int updatetimerflag = 0;
 
 int active_switch;
@@ -116,6 +116,8 @@ const char ssid_command[] = "AT+CWJAP?\r\n";
 const char ip_command[] = "AT+CIFSR\r\n";
 const char cipmux_command[] = "AT+CIPMUX=1\r\n";
 const char cipserver_command[] = "AT+CIPSERVER=1,55555\r\n";
+extern char stored_ip[16];
+
 
 extern char stored_command[6];
 
@@ -124,6 +126,17 @@ unsigned int toggle_flag = 2; // Tracks the toggle state (0: 115200, 1: 460800)
 extern unsigned int timerflag;
 extern unsigned int timer;        // Timer to handle the delay between commands
 extern unsigned int command_sent;  // Static flag to track sent command state
+
+
+unsigned int moving;
+
+extern unsigned int blacklinefollowing;
+extern unsigned int leavingCircle;
+extern unsigned int FinishedFlag;
+char BL_Stop[11] = " BL Stop! ";     // "BL Stop" fits within 10 characters, null terminator added.
+
+ unsigned int calibratingFlag = FALSE;
+extern int calibratingTime;
 
 unsigned int wheel_move;
 char forward;
@@ -155,7 +168,12 @@ void main(void){
   Init_UART_A1();
   //Init_motors();
   Init_IOT();
+  P1OUT &= ~RED_LED; // Initial Value = Low / Off
+  memset(iot_rx_buf, '\0', sizeof(iot_rx_buf));
+  memset(usb_rx_buf, '\0', sizeof(usb_rx_buf));
 
+  memset(iot_tx_buf, '\0', sizeof(iot_tx_buf));
+  memset(usb_tx_buf, '\0', sizeof(usb_tx_buf));
 
   LCD_BACKLITE_DIMING = PERCENT_60; // P6.0 Right Forward PWM duty cycle
   RIGHT_FORWARD_SPEED = WHEEL_OFF; // P6.1 Right Forward PWM duty cycle
@@ -182,30 +200,18 @@ void main(void){
 
     Display_Process();                 // Update Display
 
-//    // Logic to handle switch 1 press
-//    if (((switch1_pressed == ENABLED && active_switch == 0) || active_switch == 1)) {
-//        // Prevent re-triggering
-//        switch1_pressed = DISABLED;
-//
-//        iot_rx = 0;
-//        usb_rx = 0;
-//        strcpy(display_line[3], "           ");
-//        strcpy(display_line[1], "           ");
-//
-//        // Reset transmission buffers
-//        iot_tx = 0;
-//        usb_tx = 0;
-//
-//        // Trigger transmission of the first character
-//        UCA1TXBUF = usb_tx_buf[usb_tx++];  // Send first character from buffer
-//        UCA1IE |= UCTXIE; // Enable TX interrupt to continue transmitting
-//
-//        // Update display
-//        strcpy(display_line[0], " Transmit ");
-//        display_changed = TRUE;
-//
-//        active_switch = 0;  // Lock processing to Switch 1 while transmitting
-//    }
+    // Logic to handle switch 1 press
+    if (((switch1_pressed == ENABLED && active_switch == 0) || active_switch == 1)) {
+        // Prevent re-triggering
+        switch1_pressed = DISABLED;
+        P1OUT |= RED_LED; // Toggle LED for debugging
+
+
+        calibratingFlag = TRUE;
+        calibratingTime = 0;     // Reset calibration time counter
+
+        active_switch = 0;  // Lock processing to Switch 1 while transmitting
+    }
 
     // Logic to handle switch 2 press
     if (((switch2_pressed == ENABLED && active_switch == 0) || active_switch == 2) && !debounce2_in_progress) {
@@ -239,12 +245,10 @@ void main(void){
         active_switch = 0; // Release active switch after processing
     }
 
+
     // Handle IOT received data
     if (IOT_RECIEVEDFLAG == ENABLED) {
         parse_and_execute_commands(iot_rx_buf);
-        if (strstr(iot_rx_buf, "+CIFSR:STAIP,")) {
-            parse_ip_address(iot_rx_buf);  // Parse and display IP
-        }
 //        if (strstr(iot_rx_buf, "AP:")) {
 //            parse_ssid_address(iot_rx_buf);  // Parse and display SSID
 //        }
@@ -341,9 +345,10 @@ void main(void){
         case 0: // Move Forward
             strncpy(display_line[3], stored_command,5);
             if (counter < task_duration) {
-                straight(); // Function to move forward
+                updatetimerflag= 1;
+                ControlForward(); // Function to move forward
             } else {
-                stop_motors();
+                stop();
                 task = 5;
                 counter = 0;
                 TB1CCTL1 &= ~CCIE; // Disable timer
@@ -352,13 +357,11 @@ void main(void){
 
         case 1: // Move Backward
         strncpy(display_line[3], stored_command,5);
+        updatetimerflag = 1;
             if (counter < task_duration) {
-                LEFT_FORWARD_SPEED = WHEEL_OFF;
-                RIGHT_FORWARD_SPEED = WHEEL_OFF;
-                RIGHT_REVERSE_SPEED = RIGHTFAST;
-                LEFT_REVERSE_SPEED = LEFTFAST;
+                backwards();
             } else {
-                stop_motors();
+                stop();
                 task = 5;
                 counter = 0;
                 TB1CCTL1 &= ~CCIE; // Disable timer
@@ -367,13 +370,11 @@ void main(void){
 
         case 2: // Turn Right
             strncpy(display_line[3], stored_command,5);
+            updatetimerflag= 1;
             if (counter < task_duration) {
-                LEFT_FORWARD_SPEED = LEFTFAST;
-                RIGHT_REVERSE_SPEED = RIGHTFAST;
-                RIGHT_FORWARD_SPEED = WHEEL_OFF;
-                LEFT_REVERSE_SPEED = WHEEL_OFF;
+                Cturn_right();
             } else {
-                stop_motors();
+                stop();
                 task = 5;
                 counter = 0;
                 TB1CCTL1 &= ~CCIE; // Disable timer
@@ -381,20 +382,26 @@ void main(void){
             break;
 
         case 3: // Turn Left
+            P6OUT &= ~LCD_BACKLITE; // Initial Value = Low / Off
             strncpy(display_line[3], stored_command,5);
+            updatetimerflag= 1;
             if (counter < task_duration) {
-                LEFT_REVERSE_SPEED = LEFTFAST;
-                RIGHT_FORWARD_SPEED = RIGHTFAST;
-                LEFT_FORWARD_SPEED = WHEEL_OFF;
-                RIGHT_REVERSE_SPEED = WHEEL_OFF;
+                Cturn_left();
             } else {
-                stop_motors();
+                stop();
                 task = 5;
                 counter = 0;
                 TB1CCTL1 &= ~CCIE; // Disable timer
             }
             break;
 
+        case 4:
+            P6OUT &= ~LCD_BACKLITE; // Initial Value = Low / Off
+                stop();
+                task = 5;
+                counter = 0;
+                TB1CCTL1 &= ~CCIE; // Disable timer
+            break;
         default:
             lcd_4line();
             counter = 0;
@@ -406,46 +413,104 @@ void main(void){
 
 
 
-    if (timerflag ==1){
-    // Timer logic to manage command sending
-              if (timer < 600) {  // Wait for 3 seconds (200ms timer with 15 ticks)
-                  timer++;
-                  P6OUT ^= GRN_LED; // Toggle green LED as an example
-              }
-              else if (timer >= 600 && command_sent == 0) { // After 3 seconds, set flag to send IP command first
-                  send_ip_command_flag = TRUE;  // Set flag for sending IP command
-                  command_sent = 1;  // Mark IP command as sent
-                  timer = 0;  // Reset timer for the next command
-              }
-              else if (timer >= 400 && command_sent == 1) { // After another 1 second (200ms timer with 5 ticks), send SSID command
-                  send_ssid_command_flag = TRUE;  // Set flag for sending SSID command
-                  command_sent = 2;  // Mark SSID command as sent
-                  timer = 0;  // Reset timer for the next command
-              }
-              else if (timer >= 500 && command_sent == 2) { // After another 1 second, send CIPMUX command
-                  send_cipmux_command_flag = TRUE;  // Set flag for sending CIPMUX command
-                  command_sent = 3;  // Mark CIPMUX command as sent
-                  timer = 0;  // Reset timer for the next command
-              }
-              else if (timer >= 600 && command_sent == 3) { // After another 1 second, send CIPSERVER command
-                  send_cipserver_command_flag = TRUE;  // Set flag for sending CIPSERVER command
-                  command_sent = 4;  // Mark CIPSERVER command as sent
-                  timer = 0;  // Reset timer for the next command
-              }
-              else if (timer >= 5 && command_sent == 4) { // After another 1 second, stop sending commands
-                  send_commands_flag = FALSE;   // Reset the flag to stop sending further commands
-              }
-              timerflag =0;
 
+    if (timerflag == 1 && send_commands_flag == TRUE) {
+        // Timer logic to manage command sending
+        P6OUT ^= GRN_LED; // Toggle green LED as an example
+        timer++;  // Increment the timer at the beginning of each cycle
+
+        switch (command_sent) {
+            case 0:  // Waiting for 6 seconds for the IP command
+                if (timer < 600) {  // Wait for 6 seconds (600 * 10ms = 6 seconds)
+                    // No need to do anything here since timer is already being incremented
+                } else {  // After 6 seconds, send IP command
+                    send_ip_command_flag = TRUE; // Set flag for sending IP command
+                    command_sent = 1; // Mark IP command as sent
+                    timer = 0; // Reset timer for the next command
+                }
+                break;
+
+            case 1:  // Waiting for 1 second for SSID command
+                if (timer >= 100) {  // After 1 second (100 * 10ms = 1 second), send SSID command
+                    send_ssid_command_flag = TRUE; // Set flag for sending SSID command
+                    command_sent = 2; // Mark SSID command as sent
+                    timer = 0; // Reset timer for the next command
+                }
+                break;
+
+            case 2:  // Waiting for 1 second for CIPMUX command
+                if (timer >= 100) {  // After 1 second, send CIPMUX command
+                    send_cipmux_command_flag = TRUE; // Set flag for sending CIPMUX command
+                    command_sent = 3; // Mark CIPMUX command as sent
+                    timer = 0; // Reset timer for the next command
+                }
+                break;
+
+            case 3:  // Waiting for 1 second for CIPSERVER command
+                if (timer >= 100) {  // After 1 second, send CIPSERVER command
+                    send_cipserver_command_flag = TRUE; // Set flag for sending CIPSERVER command
+                    command_sent = 4; // Mark CIPSERVER command as sent
+                    timer = 0; // Reset timer for the next command
+                }
+                break;
+
+            case 4:  // Stop sending commands after 1 second
+                if (timer >= 100) {  // After 1 second, stop sending commands
+                    send_commands_flag = FALSE; // Reset the flag to stop sending further commands
+                    strcpy(display_line[0] , " Connect  ");
+                    moving = 1;
+                }
+                break;
+
+            default:
+                break;
+        }
+
+        timerflag = 0;  // Reset the timer flag after processing
     }
 
-//
-//HEXtoBCD(ADC_LEFT_DETECT);
-//adc_line_1(location);
-//HEXtoBCD_2(ADC_RIGHT_DETECT);
-//adc_line_2(location);
-//
-//timer_update(timechanged);
+
+                        if (updatetimerflag == 1) {
+
+                            timer_update(timechanged);
+                            if (moving)
+                            {
+                            P6OUT |= LCD_BACKLITE; // Initial Value = Low / Off
+                            strcpy(display_line[0], "Arrived 0X");
+                            changedIPlines(stored_ip);
+                            moving = 0;
+                            }
+                        }
+
+                        if (blacklinefollowing == TRUE)
+                        {
+                            go_autonomous();
+                        }
+                        if (leavingCircle)
+                        {
+                            end_autonomous();
+                        }
+
+                        if (FinishedFlag == TRUE)
+                        {
+                            strncpy(display_line[0], BL_Stop ,10);
+                            strcpy(display_line[1] , "Light Work");
+                            strcpy(display_line[2] , "NoReaction");
+
+                            display_line[3][0] = 'T';
+                            display_line[3][1] = 'i';
+                            display_line[3][2] = 'm';
+                            display_line[3][3] = 'e';
+                            display_line[3][4] = ':';
+
+                            display_line[3][6] = adc_char3[0];
+                            display_line[3][7] = adc_char3[1];
+                            display_line[3][8] = adc_char3[2];
+                            display_line[3][9] = 's';
+
+                        }
+
+
 
 
 }  //while loop
