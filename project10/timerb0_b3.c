@@ -87,7 +87,8 @@ __interrupt void Timer0_B0_ISR(void)
         calibratingFlag = FALSE;
     }
     }
-
+    P2OUT ^= IOT_RUN_RED; // Initial Value = Low / Off
+    P6OUT ^= GRN_LED;
     TB0CCR0 += TB0CCR0_200MS;
 
 }

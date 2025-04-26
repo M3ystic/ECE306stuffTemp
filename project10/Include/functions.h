@@ -107,7 +107,6 @@ void right_forward(void);
 void left_forward(void);
 void clockwise(void);
 void counterclockwise(void);
-void pj6pause(void);
 void straight(void);
 void turn(void);
 void stop(void);

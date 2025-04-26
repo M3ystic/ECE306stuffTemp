@@ -235,175 +235,95 @@ void center_text(char* dest, const char *src, int width) {
 //    display_line[0] --> centered first part ("p1.p2")
 //    display_line[1] --> centered second part ("p3.p4")
 // If parsing fails, then it shows the default messages centered.
-void parse_ip_address(char* input) {
+void parse_ip_address(char *input) {
     char *start = strstr(input, "IP,");
-    if (start != NULL) {
-        start += strlen("IP,");  // Move past the prefix
+    if (start == NULL) {
+        // Default message when no IP is found
+        center_text(display_line[2], "No IP", LINE_LEN);
+        center_text(display_line[3], "Received", LINE_LEN);
+        update_display = 1;
+        display_changed = 1;
+        return;
+    }
 
-        // Skip the opening quote, if present.
-        if (*start == '"') {
-            start++;
-        }
+    start += 3; // Move past "IP,"
+    if (*start == '"') start++;  // Skip opening quote
 
-        // Look for the closing quote.
-        char *end = strchr(start, '"');
-        if (end != NULL) {
-            // Ensure the IP string is not longer than 15 characters.
-            int ipLen = end - start;
-            if (ipLen < 16) {
-                char ip[16] = {0};
-                strncpy(ip, start, ipLen);
-                ip[ipLen] = '\0';
+    char *end = strchr(start, '"');
+    if (end == NULL || (end - start) > 15) {
+        // Default message if IP format is invalid
+        center_text(display_line[2], "No IP", LINE_LEN);
+        center_text(display_line[3], "Received", LINE_LEN);
+        update_display = 1;
+        display_changed = 1;
+        return;
+    }
 
-                // Store the IP address for later use
-                strncpy(stored_ip, ip, sizeof(stored_ip) - 1);
-                stored_ip[sizeof(stored_ip) - 1] = '\0';
+    // Copy extracted IP
+    char ip[16] = {0};
+    strncpy(ip, start, end - start);
+    ip[end - start] = '\0';
+    strncpy(stored_ip, ip, sizeof(stored_ip) - 1);
+    stored_ip[sizeof(stored_ip) - 1] = '\0';
 
-                // Manually tokenize the IP string "p1.p2.p3.p4".
-                char token1[6] = {0}, token2[6] = {0},
-                     token3[6] = {0}, token4[6] = {0};
-                char *p = ip;
-                char *dot = strchr(p, '.');
-                if (dot != NULL) {
-                    int len = dot - p;
-                    if (len > 5) len = 5;
-                    strncpy(token1, p, len);
-                    token1[len] = '\0';
+    // Tokenize the IP manually into two display lines
+    char line1[LINE_LEN] = {0}, line2[LINE_LEN] = {0};
+    int dotCount = 0, idx1 = 0, idx2 = 0;
+    int i;
+    for ( i = 0; ip[i] != '\0'; i++) {
+        if (ip[i] == '.') dotCount++;
 
-                    p = dot + 1;
-                    dot = strchr(p, '.');
-                    if (dot != NULL) {
-                        len = dot - p;
-                        if (len > 5) len = 5;
-                        strncpy(token2, p, len);
-                        token2[len] = '\0';
-
-                        p = dot + 1;
-                        dot = strchr(p, '.');
-                        if (dot != NULL) {
-                            len = dot - p;
-                            if (len > 5) len = 5;
-                            strncpy(token3, p, len);
-                            token3[len] = '\0';
-
-                            p = dot + 1;
-                            // The remainder is token4.
-                            strncpy(token4, p, 5);
-                            token4[5] = '\0';
-
-                            // Build first display line from token1 and token2.
-                            char tmp[LINE_LEN] = {0};
-                            int idx = 0, i;
-                            // Append token1.
-                            for (i = 0; token1[i] != '\0' && idx < (LINE_LEN - 1); i++, idx++) {
-                                tmp[idx] = token1[i];
-                            }
-                            // Append a dot if room permits.
-                            if (idx < (LINE_LEN - 1)) {
-                                tmp[idx++] = '.';
-                            }
-                            // Append token2.
-                            for (i = 0; token2[i] != '\0' && idx < (LINE_LEN - 1); i++, idx++) {
-                                tmp[idx] = token2[i];
-                            }
-                            tmp[idx] = '\0';
-
-                            char line1[LINE_LEN] = {0};
-                            center_text(line1, tmp, LINE_LEN);
-
-                            // Build second display line from token3 and token4.
-                            idx = 0;
-                            memset(tmp, 0, sizeof(tmp));
-                            for (i = 0; token3[i] != '\0' && idx < (LINE_LEN - 1); i++, idx++) {
-                                tmp[idx] = token3[i];
-                            }
-                            if (idx < (LINE_LEN - 1)) {
-                                tmp[idx++] = '.';
-                            }
-                            for (i = 0; token4[i] != '\0' && idx < (LINE_LEN - 1); i++, idx++) {
-                                tmp[idx] = token4[i];
-                            }
-                            tmp[idx] = '\0';
-
-                            char line2[LINE_LEN] = {0};
-                            center_text(line2, tmp, LINE_LEN);
-
-                            // Update the display lines.
-                            strcpy(display_line[2], line1);
-                            strcpy(display_line[3], line2);
-                            update_display = 1;
-                            display_changed = 1;
-                            return;
-                        }
-                    }
-                }
-            }
+        if (dotCount < 2) {
+            if (idx1 < LINE_LEN - 1) line1[idx1++] = ip[i];
+        } else {
+            if (idx2 < LINE_LEN - 1) line2[idx2++] = ip[i];
         }
     }
-    // If we couldn't parse a valid IP, display default centered messages.
-    char line1[LINE_LEN] = {0}, line2[LINE_LEN] = {0};
-    center_text(line1, "No IP", LINE_LEN);
-    center_text(line2, "Received", LINE_LEN);
-    strcpy(display_line[2], line1);
-    strcpy(display_line[3], line2);
+    line1[idx1] = '\0';
+    line2[idx2] = '\0';
+
+    // Center and update display
+    center_text(display_line[2], line1, LINE_LEN);
+    center_text(display_line[3], line2, LINE_LEN);
     update_display = 1;
     display_changed = 1;
 }
 
 
 void changedIPlines(const char* ip) {
-    if (ip == NULL || strlen(ip) == 0) {
-        // If no IP, show default message.
-        char line1[LINE_LEN] = {0};
-        char line2[LINE_LEN] = {0};
+    if (ip == NULL || *ip == '\0') {
+        // Default message when no IP is available
+        char line1[LINE_LEN] = {0}, line2[LINE_LEN] = {0};
         center_text(line1, "No IP", LINE_LEN);
         center_text(line2, "Received", LINE_LEN);
         strcpy(display_line[0], line1);
         strcpy(display_line[1], line2);
     } else {
-        // Parse the IP and divide it into two lines.
-        char token1[6] = {0}, token2[6] = {0}, token3[6] = {0}, token4[6] = {0};
-        const char* p = ip;
+        // Tokenize IP manually into two lines
+        char line1[LINE_LEN] = {0}, line2[LINE_LEN] = {0};
+        int dotCount = 0, idx1 = 0, idx2 = 0;
+        int i;
+        for (i = 0; ip[i] != '\0'; i++) {
+            if (ip[i] == '.') dotCount++;
 
-        // Split the IP into tokens.
-        char* dot = strchr(p, '.');
-        if (dot) {
-            strncpy(token1, p, dot - p);
-            token1[dot - p] = '\0';
-            p = dot + 1;
-            dot = strchr(p, '.');
-        }
-        if (dot) {
-            strncpy(token2, p, dot - p);
-            token2[dot - p] = '\0';
-            p = dot + 1;
-            dot = strchr(p, '.');
-        }
-        if (dot) {
-            strncpy(token3, p, dot - p);
-            token3[dot - p] = '\0';
-            p = dot + 1;
-            strncpy(token4, p, 5);
+            if (dotCount < 2) {
+                if (idx1 < LINE_LEN - 1) line1[idx1++] = ip[i];
+            } else {
+                if (idx2 < LINE_LEN - 1) line2[idx2++] = ip[i];
+            }
         }
 
-        // Combine token1 and token2 into line1, and token3 and token4 into line2.
-        char tmp[LINE_LEN] = {0};
-        snprintf(tmp, sizeof(tmp), "%s.%s", token1, token2);
-        char line1[LINE_LEN] = {0};
-        center_text(line1, tmp, LINE_LEN);
+        line1[idx1] = '\0';
+        line2[idx2] = '\0';
 
-        snprintf(tmp, sizeof(tmp), "%s.%s", token3, token4);
-        char line2[LINE_LEN] = {0};
-        center_text(line2, tmp, LINE_LEN);
-
-        // Update display lines.
-        strcpy(display_line[1], line1);
-        strcpy(display_line[2], line2);
+        center_text(display_line[1], line1, LINE_LEN);
+        center_text(display_line[2], line2, LINE_LEN);
     }
 
     update_display = 1;
     display_changed = 1;
 }
+
 
 
 void parse_ssid_address(char* input) {

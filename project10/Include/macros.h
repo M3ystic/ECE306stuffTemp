@@ -25,9 +25,6 @@
 #define LINE_LEN 11
 #define LINE_WIDTH 10
 
-
-
-
 #define NONE ('N')
 #define Triangle ('T')   //changed from L
 #define Circle ('L')
@@ -36,25 +33,6 @@
 #define START ('S')
 #define RUN ('R')
 #define END ('E')
-
-#define circle  WHEEL_COUNT_TIME (20)
-#define circleRIGHT_COUNT_TIME (25)
-#define circleLEFT_COUNT_TIME (3)
-#define circleTRAVEL_DISTANCE (160)
-#define WAITING2START (50)
-
-#define WHEEL_COUNT_TIME (20)
-
-
-#define f8WHEEL_COUNT_TIME (15)
-#define f8RIGHT_COUNT_TIME (15)
-#define f8LEFT_COUNT_TIME (1)
-#define f8TRAVEL_DISTANCE (45)
-
-#define f8WHEEL_COUNT_TIME2 (15)
-#define f8RIGHT_COUNT_TIME2 (1)
-#define f8LEFT_COUNT_TIME2 (15)
-#define f8TRAVEL_DISTANCE2 (90)
 
 //timer12500
 #define TB0CCR0_200MS   (25000)  /* 8 000 000 / 8 / 8 / 5     (1/200ms) --> (1/.2) = 5  */
@@ -114,19 +92,11 @@ int MIDDLELINE;
 ///5.174v is 1200
 //2100 to start moving
 
-//2030 left wheel wont move
-
-#define MESSAGE "NCSU  #1"
-#define IOT_RX_BUF_SIZE 25  // Define buffer size (adjust as needed)
-#define USB_RX_BUF_SIZE 25  // Define buffer size (adjust as needed)
-
+//2030 left wheel wont movee
 
 
 #define MAX_LEN             16
-#define MAX_BUFFER_SIZE     32
-#define BEGINNING           0
 
-#define SMALL_RING_SIZE (16)
 
 #define BAUD_115200 4
 #define MCTL_115200 0x5551

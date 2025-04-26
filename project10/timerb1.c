@@ -64,7 +64,7 @@ __interrupt void Timer1_B0_ISR(void)
 __interrupt void TIMER1_B1_ISR(void) {
     switch (__even_in_range(TB1IV, 14)) {
         case 0: break; // No interrupt
-        case 2: counter++; break; // CCR1 interrupt
+        case 2: counter++; P1OUT ^= RED_LED; break; // CCR1 interrupt
         case 4: counter2++; break; // CCR2 interrupt
         case 14: break; // Timer overflow
         default: break;

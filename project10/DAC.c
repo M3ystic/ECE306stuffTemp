@@ -48,14 +48,6 @@ void Init_DAC(void){
   P3OUT   &= ~DAC_CNTL;                 // Set output to Low
   P3DIR   &= ~DAC_CNTL;                 // Set direction to input
   P3SELC  |=  DAC_CNTL;                 // DAC_CNTL DAC operation
-//
-//  DAC_data = DAC_Begin; // Starting Low value for DAC output [2v]
-//  SAC3DAT = DAC_data; // Initial DAC data
-//
-//  TB0CTL |= TBIE; // Timer B0 overflow interrupt enable
-//
-//  P6DIR &= ~GRN_LED; // Set Green LED off
-//  P1OUT |= RED_LED;  // Set RED_LED On indicates the OVERFLOW timer start
 
   SAC3DAC |=  DACEN;                    // Enable DAC
 
