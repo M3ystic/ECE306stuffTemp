@@ -1,16 +1,13 @@
 /*
- * switches.c
- *
- * Created on: Feb 13, 2025
+ * April 21, 2025
  * Author: Derrick Tweneboah
  *
- * Synopsis:
+ * Description:
  * This file implements interrupt service routines (ISRs) for switches connected to PORT4 (Switch 1)
  * and PORT2 (Switch 2) of the MSP430. These ISRs handle debounce logic using timers and
  * toggle associated flags for further processing. Debounce is managed using Timer B modules.
  */
 
-#include "include/switch.h"  // Header for switch-related macros and declarations
 #include "include/macros.h"  // Header for global macros
 #include "include/ports.h"   // Header for port and pin definitions
 #include "msp430.h"          // MSP430-specific definitions

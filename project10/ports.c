@@ -1,8 +1,11 @@
 /*
- * ports.c
+ *  April 21, 2025
+ *  Author: Dtwen
  *
- *  Created on: Jan 29, 2025
- *      Author: Dtwen
+ *  This file contains functions for initializing various ports on the MSP430 microcontroller.
+ *  Each port's pin configuration is set based on the defined macros for specific peripherals.
+ *  The ports are initialized for different functions such as GPIO operation, input/output,
+ *  UART, and various other specific functionalities for sensors and peripherals.
  */
 
 
@@ -10,7 +13,6 @@
 #include "include\ports.h"
 #include "include\functions.h"
 #include "msp430.h"
-
 
 
 

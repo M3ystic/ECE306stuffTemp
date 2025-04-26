@@ -1,10 +1,8 @@
 /*
- * timerb1.c
- *
- * Created on: Feb 26, 2025
+ * April 21, 2025
  * Author: Derrick Tweneboah
  *
- * Synopsis:
+ * Description:
  * This file initializes and handles Timer B1 on the MSP430. Timer B1 is configured to
  * generate periodic interrupts for debounce handling and other time-based tasks.
  * The file defines two ISRs: one for CCR0 and another for CCR1 and other CCRx values.
@@ -50,7 +48,7 @@ void Init_timer_B1(void)
 __interrupt void Timer1_B0_ISR(void)
 {
     debounce_count1++;             // Increment debounce counter
-    if (debounce_count1 == 4)
+    if (debounce_count1 == DEBOUNCEDONE)
     {    // Check if debounce period is complete
 
         TB1CCTL0 &= ~CCIE; // CCR1 enable interrupt
@@ -64,8 +62,8 @@ __interrupt void Timer1_B0_ISR(void)
 __interrupt void TIMER1_B1_ISR(void) {
     switch (__even_in_range(TB1IV, 14)) {
         case 0: break; // No interrupt
-        case 2: counter++; P1OUT ^= RED_LED; break; // CCR1 interrupt
-        case 4: counter2++; break; // CCR2 interrupt
+        case 2: counter++; P1OUT ^= RED_LED; break; // CCR1 interrupt  //Counter used for commands switch statement and
+        case 4: counter2++; break; // CCR2 interrupt //counter used for black line following
         case 14: break; // Timer overflow
         default: break;
     }

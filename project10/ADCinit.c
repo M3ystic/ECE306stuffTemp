@@ -1,9 +1,11 @@
 /*
- * ADC.c
+ * April 21, 2025
+ * Author: Derrick Tweneboah
  *
- *  Created on: Feb 25, 2025
- *      Author: Dtwen
+ * Description:
+ * This file initializes the Analog-to-Digital Converter (ADC) and configures the necessary ports for its operation.
  */
+
 #include "include\macros.h"
 #include "include\ports.h"
 #include "include\functions.h"
@@ -68,7 +70,7 @@ void Init_ADC(void){
      ADCCTL2 &= ~ADCDF; // ADC data read-back format 0b = Binary unsigned.
      ADCCTL2 &= ~ADCSR; // ADC sampling rate 0b = ADC buffer supports up to 200 ksps
     // ADCMCTL0 Register
-     ADCMCTL0 |= ADCSREF_0; // VREF - 000b = {VR+ = AVCC and VR– = AVSS }
+     ADCMCTL0 |= ADCSREF_0; // VREF - 000b = {VR+ = AVCC and VRï¿½ = AVSS }
      ADCMCTL0 |= ADCINCH_2; // LEFT_DETECT (0x20) Pin 2 A2
      ADCIE |= ADCIE0; // Enable ADC conv complete interrupt
      ADCCTL0 |= ADCENC; // ADC enable conversion.

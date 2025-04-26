@@ -1,16 +1,9 @@
-/*
- * clocks.c
- *
- *  Created on: Jan 29, 2025
- *      Author: Dtwen
- */
-
 // ------------------------------------------------------------------------------
 //
 //  Description: This file contains the Clock Initialization
 //
-//  Jim Carlson
-//  Jan 2021
+//  Derrick Tweneboah
+//  Jan 2025
 //  Built with IAR Embedded Workbench Version: V7.12.1
 // ------------------------------------------------------------------------------
 #include  "include\functions.h"

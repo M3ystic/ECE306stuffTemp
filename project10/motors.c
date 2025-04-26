@@ -1,9 +1,12 @@
 /*
- * wheels.c
+ * April 21, 2025
+ * Author: Derrick Tweneboah
  *
- *  Created on: Feb 5, 2025
- *      Author: Dtwen
+ * Description:
+ * This file contains functions to control motor movements, including forward,
+ * backward, turning, and rotational movements. Earlier Projects, Currently holds no use.
  */
+
 #include "include\macros.h"
 #include "include\ports.h"
 #include "include\functions.h"
@@ -61,28 +64,3 @@ inline void motors_off(void)
     P6OUT &= ~GRN_LED; // Set Green LED off
     P1OUT &= ~RED_LED; // Set Red LED off
 }
-
-
-//void right_forward(void)
-//{
-//    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
-//    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
-//
-//    P6OUT &= ~L_FORWARD; // Set Port pin low [Wheel Off]
-//    P6OUT |= R_FORWARD; // Set Port pin High [Wheel On]
-//
-//
-//}
-//
-//void left_forward(void)
-//{
-//    P6OUT &= ~L_REVERSE; // Set Port pin Low [Wheel Off]
-//    P6OUT &= ~R_REVERSE; // Set Port pin Low [Wheel Off]
-//
-//    P6OUT &= ~R_FORWARD; // Set Port pin low [Wheel Off]
-//    P6OUT |= L_FORWARD; // Set Port pin High [Wheel On]
-//
-//
-//}
-//
-

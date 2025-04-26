@@ -1,3 +1,12 @@
+/*
+ * File: DAC.c
+ * Created on: Apr 26, 2025
+ * Author: Derrick Tweneboah
+ *
+ * Description:
+ * This file configures the DAC (Digital-to-Analog Converter) in buffer mode.
+ * It initializes the DAC with a positive ramp output and uses the internal 2.5V reference.
+ */
 //------------------------------------------------------------------------------
 //  MSP430FR235x Demo - SAC-L3, DAC Buffer Mode
 //
@@ -23,13 +32,6 @@
 unsigned int DAC_data;
 
 void Init_DAC(void){
-////configure refrence module
-//
-//  PMMCTL0_H = PMMPW_H;                  // Unlock the PMM registers
-//  PMMCTL2 = INTREFEN;                    // Enable internal reference
-//  PMMCTL2 |= REFVSEL_2   ;               // Select 2.5v reference
-//  while (!(PMMCTL2 & REFGENRDY));       // Poll till internal reference settles
-
 
   DAC_data = DAC_BEGIN;                 //4000
   SAC3DAT = DAC_data;
