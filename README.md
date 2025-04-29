@@ -54,7 +54,7 @@ Navigate a Wi-Fi-controlled course with eight checkpoints.
 
 After reaching checkpoint 8, transition to autonomous line-following mode to complete the challenge.
 
-##Final Demonstration
+## Final Demonstration
 IoT Navigation: Drive the car through a Wi-Fi-controlled course , stopping at eight designated pads. At each pad:
 
 Display "Arrived 0X" (X = pad number) on the LCD.
