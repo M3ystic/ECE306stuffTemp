@@ -1,8 +1,9 @@
 /*
- * interrupts.h
+ * April 21, 2025
+ * Author: Derrick Tweneboah
  *
- *  Created on: Feb 16, 2025
- *      Author: Dtwen
+ * Description:
+ * Holds flags and variables used in timer files.
  */
 
 #ifndef INCLUDE_TIMERS_H_

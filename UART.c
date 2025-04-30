@@ -6,40 +6,42 @@
  * This file configures UART modules for communication and manages baud rate settings.
  * It also provides interrupt service routines for UART communication.
  */
-
+//------------------------------------------------------------------------------
 #include "include\\macros.h"
 #include "include\\ports.h"
 #include "include\\functions.h"
 #include "msp430.h"
 #include <string.h>
-
+//------------------------------------------------------------------------------
 // Flags for UART transmission and reception
+//------------------------------------------------------------------------------
 int A0TX_complete_flag;
 int A1TX_complete_flag;
 int IOT_RECIEVEDFLAG = DISABLED;
 int CLIENT_RECIEVEDFLAG = DISABLED;
-
-// Baud rate configurations
+//------------------------------------------------------------------------------
+// Baud Rate Configurations
+//------------------------------------------------------------------------------
 int BAUDRATE115200;
 int BAUDRATE9600;
-
-// Command detection
+//------------------------------------------------------------------------------
+// Command Detection
+//------------------------------------------------------------------------------
 int command_detected = FALSE;
-
-// Buffers for UART communication
+//------------------------------------------------------------------------------
+// Buffers for UART Communication
+//------------------------------------------------------------------------------
 unsigned int CLIENT_tx, CLIENT_rx;
 unsigned int IOTmodule_tx, IOTmodule_rx;
-char CLIENT_tx_buf[128];
-char CLIENT_rx_buf[128];
-char IOTmodule_rx_buf[128];
-char IOTmodule_tx_buf[128];
-
-// Buffer for processing commands
-char process_buffer[25];
-char pb_index; // Index for process_buffer
-
-// External variables
+char CLIENT_tx_buf[BUFFERSIZE];
+char CLIENT_rx_buf[BUFFERSIZE];
+char IOTmodule_rx_buf[BUFFERSIZE];
+char IOTmodule_tx_buf[BUFFERSIZE];
+//------------------------------------------------------------------------------
+// External Variables
+//------------------------------------------------------------------------------
 extern int active_switch;
+
 
 void Init_UART_A0(void) {
     UCA0CTLW0 |= UCSWRST; // Put eUSCI in reset

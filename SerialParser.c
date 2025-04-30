@@ -8,7 +8,9 @@
  * control, blackline following, and displaying IP addresses and task states
  * on an LCD screen.
  */
-
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
 #include <msp430.h>
 #include <string.h>
 #include "include/functions.h"
@@ -17,31 +19,44 @@
 #include "include/macros.h"
 #include <stdlib.h>  // Required for atoi
 #include <stdio.h>
-
-
+//------------------------------------------------------------------------------
+// External Variables for Display
+//------------------------------------------------------------------------------
 extern char display_line[4][11];
 extern char *display[4];
 extern volatile unsigned char display_changed;
 extern volatile unsigned char update_display;
-
-char stored_ip[IPLENGTH] = {NOTHING};   // To store the IP address in dotted format
-char stored_ssid[SSIDSIZE] = {NOTHING}; // To store the SSID (up to 10 characters)
-char stored_command[COMMANDSIZE] = {'0','0','X','X','X'};
-
+//------------------------------------------------------------------------------
+// Stored Data Buffers
+//------------------------------------------------------------------------------
+char stored_ip[IPLENGTH] = {NOTHING};         // To store the IP address in dotted format
+char stored_ssid[SSIDSIZE] = {NOTHING};       // To store the SSID (up to 10 characters)
+char stored_command[COMMANDSIZE] = {'0', '0', 'X', 'X', 'X'};
+//------------------------------------------------------------------------------
+// IOT Module Buffers
+//------------------------------------------------------------------------------
 extern char IOTmodule_tx_buf[BUFFERSIZE];
 extern char IOTmodule_rx_buf[BUFFERSIZE];
 unsigned int IOTmodule_tx;
-
+//------------------------------------------------------------------------------
+// Task Management Variables
+//------------------------------------------------------------------------------
 extern int task;
 extern int task2;
 extern int task3;
 unsigned int task_duration;
-extern volatile unsigned int updatetimerflag; // Flag for timer update
-
+//------------------------------------------------------------------------------
+// Timer and Update Flags
+//------------------------------------------------------------------------------
+extern volatile unsigned int updatetimerflag; // Flag for timer updates
+//------------------------------------------------------------------------------
+// Miscellaneous Variables
+//------------------------------------------------------------------------------
 extern int counter;
-unsigned int blacklinefollowing = FALSE;
-unsigned int leavingCircle = FALSE;
-unsigned int turnFlag = FALSE;
+unsigned int blacklinefollowing = FALSE;  // Black line following state
+unsigned int leavingCircle = FALSE;      // Leaving circle state
+unsigned int turnFlag = FALSE;           // Turn state flag
+
 
 void parse_and_execute_commands(char* buffer) {
     if (strstr(buffer, "IP,")) {

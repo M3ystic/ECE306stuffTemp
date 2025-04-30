@@ -8,22 +8,22 @@
  * The file defines two ISRs: one for CCR0 and another for CCR1 and other CCRx values.
  * The timer operates using SMCLK as the clock source, with clock division for slower timing.
  */
-
+//------------------------------------------------------------------------------
 #include "include/timers.h"       // Header file for Timer-related macros and declarations
 #include "include/macros.h"       // Header file for global macros
 #include "include/functions.h"    // Header file for utility functions
 #include "include/LCD.h"          // Header file for LCD interface functions
 #include "msp430.h"               // MSP430-specific definitions
 #include "include/ports.h"
-
-
-
-// Global variables
-extern unsigned int debounce_count1;  // Counter for debounce logic
-extern unsigned int debounce1_in_progress;     // Flag indicating if debounce is active
+//------------------------------------------------------------------------------
+// Global Variables
+//------------------------------------------------------------------------------
+extern unsigned int debounce_count1;          // Counter for debounce logic
+extern unsigned int debounce1_in_progress;    // Flag indicating if debounce is active
 extern int counter;                            // General-purpose counter
 extern int counter2;
 extern int task;
+
 
 // Function to initialize Timer B1
 void Init_timer_B1(void)

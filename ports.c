@@ -1,11 +1,12 @@
 /*
- *  April 21, 2025
- *  Author: Dtwen
+ * April 21, 2025
+ * Author: Derrick Tweneboah
  *
- *  This file contains functions for initializing various ports on the MSP430 microcontroller.
- *  Each port's pin configuration is set based on the defined macros for specific peripherals.
- *  The ports are initialized for different functions such as GPIO operation, input/output,
- *  UART, and various other specific functionalities for sensors and peripherals.
+ * Description:
+ * This file contains functions for initializing various ports on the MSP430 microcontroller.
+ * Each port's pin configuration is set based on the defined macros for specific peripherals.
+ * The ports are initialized for different functions such as GPIO operation, input/output,
+ * UART, and various other specific functionalities for sensors and peripherals.
  */
 
 

@@ -113,7 +113,7 @@ int MIDDLELINE;   //black line value for car to follow
 #define RMULTIPLIER 1
 #define BUFFERSIZE 128
 #define COMMANDSIZE 6
-
+#define LOWESTVALUEREAD 1023
 
 // Baud Rate Settings
 #define BAUD_115200 4

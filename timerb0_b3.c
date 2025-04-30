@@ -9,39 +9,51 @@
  * is configured for generating PWM signals for motor control and LCD backlight dimming.
  */
 
- #include "include/macros.h"
- #include "include/functions.h"
- #include "include/LCD.h"
- #include "msp430.h"
- #include "include/ports.h"
- 
- // External variables for display update and debounce logic
- extern volatile unsigned char display_changed; // Flag for display change
- extern volatile unsigned char update_display; // Flag to update the display
- extern volatile unsigned int debounce_count2; // Counter for debounce logic
- extern unsigned int debounce2_in_progress;    // Debounce in progress flag
- 
- // Timer variables
-  unsigned int timechanged = RESET_STATE;        // Time tracking variable
- extern volatile unsigned int updatetimerflag; // Flag for timer update
- extern unsigned int DAC_data;                 // DAC data value
- int counterIOT;
- volatile unsigned int send_commands_flag = FALSE;  // Flag to indicate when to send commands
- volatile unsigned int send_ssid_command_flag = FALSE;  // Set flag for sending SSID command
- volatile unsigned int send_ip_command_flag = FALSE;   // Set flag for sending IP command
- volatile unsigned int send_cipmux_command_flag = FALSE;   // Set flag for sending IP command
- volatile unsigned int send_cipserver_command_flag = FALSE;   // Set flag for sending IP command
- unsigned int timer = RESET_STATE;        // Timer to handle the delay between commands
- unsigned int command_sent = FALSE;  // Static flag to track sent command state
- unsigned int timerflag;
- 
- int calibratingTime;
- 
- extern int maxBlackValue; // Track highest black value
- extern int minWhiteValue; // Track lowest black value
- extern int calibrating;
- extern unsigned int calibratingFlag;
- 
+//------------------------------------------------------------------------------
+// Includes
+//------------------------------------------------------------------------------
+#include "include/macros.h"
+#include "include/functions.h"
+#include "include/LCD.h"
+#include "msp430.h"
+#include "include/ports.h"
+//------------------------------------------------------------------------------
+// External Variables for Display Update and Debounce Logic
+//------------------------------------------------------------------------------
+extern volatile unsigned char display_changed;  // Flag for display change
+extern volatile unsigned char update_display;  // Flag to update the display
+extern volatile unsigned int debounce_count2;  // Counter for debounce logic
+extern unsigned int debounce2_in_progress;     // Debounce in progress flag
+//------------------------------------------------------------------------------
+// Timer Variables
+//------------------------------------------------------------------------------
+unsigned int timechanged = RESET_STATE;         // Time tracking variable
+extern volatile unsigned int updatetimerflag;  // Flag for timer update
+extern unsigned int DAC_data;                  // DAC data value
+unsigned int timer = RESET_STATE;              // Timer for command delays
+unsigned int command_sent = FALSE;             // Static flag to track sent command state
+unsigned int timerflag;
+//------------------------------------------------------------------------------
+// Flags for Sending Commands
+//------------------------------------------------------------------------------
+volatile unsigned int send_commands_flag = FALSE;            // General command flag
+volatile unsigned int send_ssid_command_flag = FALSE;        // Flag for sending SSID command
+volatile unsigned int send_ip_command_flag = FALSE;          // Flag for sending IP command
+volatile unsigned int send_cipmux_command_flag = FALSE;      // Flag for sending MUX command
+volatile unsigned int send_cipserver_command_flag = FALSE;   // Flag for sending server command
+//------------------------------------------------------------------------------
+// Calibration Variables
+//------------------------------------------------------------------------------
+int calibratingTime;
+extern int maxBlackValue;               // Track highest black value
+extern int minWhiteValue;               // Track lowest black value
+extern int calibrating;
+extern unsigned int calibratingFlag;
+//------------------------------------------------------------------------------
+// Miscellaneous
+//------------------------------------------------------------------------------
+int counterIOT;
+
  
  // Function to initialize Timer_B0
  void Init_timer_B0(void)

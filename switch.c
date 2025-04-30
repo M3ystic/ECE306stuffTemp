@@ -7,14 +7,14 @@
  * and PORT2 (Switch 2) of the MSP430. These ISRs handle debounce logic using timers and
  * toggle associated flags for further processing. Debounce is managed using Timer B modules.
  */
-
+//------------------------------------------------------------------------------
 #include "include/macros.h"  // Header for global macros
 #include "include/ports.h"   // Header for port and pin definitions
 #include "msp430.h"          // MSP430-specific definitions
-extern unsigned int position;
-extern char message[];
-// Global variables
-extern unsigned  int debounce_count1; // Debounce counter for Switch 1
+//------------------------------------------------------------------------------
+// Global Variables
+//------------------------------------------------------------------------------
+extern unsigned int debounce_count1;          // Debounce counter for Switch 1
 extern unsigned volatile int debounce_count2; // Debounce counter for Switch 2
 
 extern unsigned int switch1_pressed;          // Flag for Switch 1 press event
@@ -22,8 +22,10 @@ unsigned int debounce1_in_progress;           // Debounce in-progress flag for S
 
 extern unsigned int switch2_pressed;          // Flag for Switch 2 press event
 unsigned int debounce2_in_progress;           // Debounce in-progress flag for Switch 2
-extern int task;
+
+extern int task;                               // Current task indicator
 extern int counter;                            // General-purpose counter
+
 
 
 

@@ -19,8 +19,8 @@
  unsigned int ADC_RIGHT_DETECT;
  
  // Calibration variables
- int maxBlackValue = 0;      // Highest black detection for right sensor
- int minWhiteValue = 1023;   // Lowest white detection for right sensor
+ int maxBlackValue = NOTHING;      // Highest black detection for right sensor
+ int minWhiteValue = LOWESTVALUEREAD;   // Lowest white detection for right sensor
  unsigned int calibrating = TRUE; // Calibration mode flag
  
  #pragma vector=ADC_VECTOR

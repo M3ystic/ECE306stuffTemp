@@ -11,64 +11,71 @@
  * The file also interfaces with the ADC to detect obstacles and uses timer-based logic
  * for movement control and task sequencing.
  */
-
-#include <msp430.h>
-#include <string.h>
-#include "include/functions.h"
-#include "include/LCD.h"
-#include "include/ports.h"
-#include "include/macros.h"
-//#include "include\pid.h"
-#include <stdint.h>
-
 //------------------------------------------------------------------------------
-// Global Variables
+// Includes
 //------------------------------------------------------------------------------
+#include <msp430.h>             // MSP430-specific definitions
+#include <string.h>             // Standard string library
+#include "include/functions.h"  // Header for utility functions
+#include "include/LCD.h"        // Header for LCD interface functions
+#include "include/ports.h"      // Header for port and pin definitions
+#include "include/macros.h"     // Header for global macros
+#include <stdint.h>             // Header for fixed-width integer types
+//------------------------------------------------------------------------------
+// ADC Variables
+//------------------------------------------------------------------------------
+extern unsigned int ADC_LEFT_DETECT;  // ADC value for left obstacle detection
+extern unsigned int ADC_RIGHT_DETECT; // ADC value for right obstacle detection
+//------------------------------------------------------------------------------
+// Display Variables
+//------------------------------------------------------------------------------
+extern volatile char slow_input_down;         // Flag to slow down input handling
+extern char display_line[4][11];              // Buffer for display lines
+extern char *display[4];                      // Pointers to display lines
+extern unsigned char display_mode;            // Display mode selector
+extern volatile unsigned char display_changed; // Flag for display changes
+extern volatile unsigned char update_display;  // Flag for display updates
+extern volatile unsigned int update_display_count; // Counter for display updates
+//------------------------------------------------------------------------------
+// Movement and Control Variables
+//------------------------------------------------------------------------------
+int side;                                     // Tracks the side for pivoting
+int maxCounter;                               // Maximum counter value for timing movements
+unsigned int FinishedFlag = FALSE;            // Indicates when a task is finished
+//------------------------------------------------------------------------------
+// Task and Timing Variables
+//------------------------------------------------------------------------------
+extern unsigned int blacklinefollowing;       // Flag for blackline following mode
+unsigned int carfollowingLine;                // Flag for car following mode
+extern unsigned int leavingCircle;            // Flag for exiting a circular path
+extern int counter2;                          // Counter for timing and events
+extern unsigned int timechanged;              // Flag for time changes
+extern volatile unsigned int updatetimerflag; // Flag for timer updates
+//------------------------------------------------------------------------------
+// Task State Variables
+//------------------------------------------------------------------------------
+extern int task2;                             // Task state for autonomous movement
+extern int task3;                             // Task state for exiting autonomous mode
+//------------------------------------------------------------------------------
+// Communication Variables
+//------------------------------------------------------------------------------
+extern int IOT_RECIEVEDFLAG;                  // Flag for IoT communication status
+extern char stored_command[COMMANDSIZE];      // Command buffer for received commands
+extern char IOTmodule_rx_buf[BUFFERSIZE];     // IoT module receive buffer
+//------------------------------------------------------------------------------
+// Turn Control Variables
+//------------------------------------------------------------------------------
+extern unsigned int turnFlag;                 // Flag for direction of turns
+//------------------------------------------------------------------------------
+// Pre-defined Display Messages
+//------------------------------------------------------------------------------
+char BL_Start[LINE_LEN] = " BL Start ";       // Indicates the start of blackline following
+char Intercept[LINE_LEN] = "Intercept!";      // Indicates obstacle detection
+char BL_Turn[LINE_LEN] = " BL Turn! ";        // Indicates a turning action
+char BL_Travel[LINE_LEN] = "BL Travel!";      // Indicates traveling along the blackline
+char BL_Circle[LINE_LEN] = "BL Circle!";      // Indicates following a circular path
+char BL_Exit[LINE_LEN] = " BL Exit! ";        // Indicates exiting the blackline
 
-// ADC variables for detecting obstacles
-extern unsigned int ADC_LEFT_DETECT;
-extern unsigned int ADC_RIGHT_DETECT;
-
-// Display-related variables
-extern volatile char slow_input_down;
-extern char display_line[4][11];
-extern char *display[4];
-extern unsigned char display_mode;
-extern volatile unsigned char display_changed;
-extern volatile unsigned char update_display;
-extern volatile unsigned int update_display_count;
-
-// Movement and control variables
-int side;         // Tracks the side for pivoting
-int maxCounter;   // Maximum counter value for timing movements
-unsigned int FinishedFlag = FALSE;  // Indicates when a task is finished
-
-// Task and timing variables
-extern unsigned int blacklinefollowing;
-unsigned int carfollowingLine;
-extern unsigned int leavingCircle;
-extern int counter2;
-extern unsigned int timechanged;
-extern volatile unsigned int updatetimerflag; // Flag for timer update
-
-extern int task2; // Task state for autonomous movement
-extern int task3; // Task state for exiting autonomous mode
-
-// Communication-related variables
-extern int IOT_RECIEVEDFLAG;
-extern char stored_command[COMMANDSIZE]; // Command buffer
-extern char IOTmodule_rx_buf[BUFFERSIZE]; // IoT module receive buffer
-
-// Turn flag to determine direction of turns
-extern unsigned int turnFlag;
-
-// Pre-defined display messages
-char BL_Start[LINE_LEN] = " BL Start ";   // Indicates the start of blackline following
-char Intercept[LINE_LEN] = "Intercept!"; // Indicates obstacle detection
-char BL_Turn[LINE_LEN] = " BL Turn! ";   // Indicates a turning action
-char BL_Travel[LINE_LEN] = "BL Travel!"; // Indicates traveling along the blackline
-char BL_Circle[LINE_LEN] = "BL Circle!"; // Indicates following a circular path
-char BL_Exit[LINE_LEN] = " BL Exit! ";   // Indicates exiting the blackline
 
 //------------------------------------------------------------------------------
 // Autonomous Control Functions
@@ -76,9 +83,6 @@ char BL_Exit[LINE_LEN] = " BL Exit! ";   // Indicates exiting the blackline
 
 /**
  * Function: go_autonomous
- * ------------------------
- * Controls the robot's autonomous movement through different tasks.
- * Tasks include turning, moving forward, detecting obstacles, and following a circle.
  */
 void go_autonomous(void) {
     switch (task2) {

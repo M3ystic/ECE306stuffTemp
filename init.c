@@ -1,8 +1,9 @@
 /*
- * init.c
+ * April 21, 2025
+ * Author: Derrick Tweneboah
  *
- *  Created on: Jan 29, 2025
- *      Author: Dtwen
+ * Description:
+ * Holds premade/given initiliazion functions.
  */
 
 #include "msp430.h"
