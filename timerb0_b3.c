@@ -70,7 +70,7 @@ int counterIOT;
      TB0CTL &= ~TBIFG;       // Clear overflow interrupt flag
  
      TB0CCR1 = TB0CCR1_10MS;  // Set CCR1 for 10ms (not used)
-     TB0CCR2 = TB0CCR2_250MS; // Set CCR2 for 250ms debounce logic
+     TB0CCR2 = TB0CCR2_200MS; // Set CCR2 for 200ms debounce logic
  }
  
  // Timer_B0 CCR0 interrupt service routine
@@ -141,7 +141,7 @@ int counterIOT;
              TB0CCTL2 &= ~CCIE; // CCR1 enable interrupt
              P2IE |= SW2; // Enable the Switch Interrupt.
          }
-         TB0CCR2 += TB0CCR2_250MS;
+         TB0CCR2 += TB0CCR2_200MS;
          break;
      case 14: break; // Overflow interrupt (not used)
      default: break;
